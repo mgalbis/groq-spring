@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  chatbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      # La variable se pasa desde el entorno del host
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      # Otras variables de Spring Boot si necesitas
+      - SPRING_PROFILES_ACTIVE=prod
+    # Alternativa: usar env_file
+    # env_file:
+    #   - .env
+    restart: unless-stopped

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editor de tono Wakamiti</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f5;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+
+        p.description {
+            margin-top: 4px;
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        label {
+            display: block;
+            margin-top: 16px;
+            margin-bottom: 4px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+
+        .row {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        .button-row {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        button {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #111827;
+            color: white;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .result-box {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 12px;
+            background: #f9fafb;
+            border: 1px dashed #d1d5db;
+            min-height: 80px;
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .meta {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .error {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #b91c1c;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            background: #eef2ff;
+            color: #3730a3;
+            margin-left: 4px;
+        }
+
+        .small-hint {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Editor de tono</h1>
+    <p class="description">
+        Reescribe tu texto manteniendo el significado, pero adaptando el tono
+        (formal, informal, amable, asertivo, entusiasta o neutro).
+    </p>
+
+    <label for="inputText">Texto original</label>
+    <textarea id="inputText" placeholder="Escribe aquí el texto que quieres reescribir..."></textarea>
+
+    <label for="tone">Tono deseado</label>
+    <select id="tone">
+        <option value="FORMAL">Formal</option>
+        <option value="INFORMAL">Informal</option>
+        <option value="AMABLE">Amable</option>
+        <option value="ASERTIVO">Asertivo</option>
+        <option value="ENTUSIASTA">Entusiasta</option>
+        <option value="NEUTRO" selected>Neutro</option>
+    </select>
+
+    <div class="row">
+        <div class="col">
+            <label for="temperature">
+                Temperature
+                <span class="badge">0.0 – 2.0</span>
+            </label>
+            <input id="temperature" type="number" step="0.1" min="0" max="2" placeholder="(opcional, p. ej. 0.7)">
+            <div class="small-hint">
+                Baja = más preciso · Alta = más creativo
+            </div>
+        </div>
+        <div class="col">
+            <label for="topP">
+                top_p
+                <span class="badge">0.0 – 1.0</span>
+            </label>
+            <input id="topP" type="number" step="0.05" min="0" max="1" placeholder="(opcional, p. ej. 0.9)">
+            <div class="small-hint">
+                Control de diversidad de palabras
+            </div>
+        </div>
+    </div>
+
+    <div class="button-row">
+        <button id="rewriteBtn" class="btn-primary">Reescribir</button>
+        <button id="clearBtn" class="btn-secondary">Limpiar</button>
+        <span id="status" class="small-hint"></span>
+    </div>
+
+    <div id="error" class="error" style="display:none;"></div>
+
+    <div style="margin-top: 24px;">
+        <div class="result-label">Texto reescrito</div>
+        <div id="result" class="result-box"></div>
+        <div id="meta" class="meta"></div>
+    </div>
+</div>
+
+<script>
+    const rewriteBtn = document.getElementById('rewriteBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const inputText = document.getElementById('inputText');
+    const toneSelect = document.getElementById('tone');
+    const temperatureInput = document.getElementById('temperature');
+    const topPInput = document.getElementById('topP');
+    const resultBox = document.getElementById('result');
+    const metaBox = document.getElementById('meta');
+    const errorBox = document.getElementById('error');
+    const statusLabel = document.getElementById('status');
+
+    function setLoading(loading) {
+        rewriteBtn.disabled = loading;
+        statusLabel.textContent = loading ? 'Generando respuesta…' : '';
+    }
+
+    rewriteBtn.addEventListener('click', async () => {
+        errorBox.style.display = 'none';
+        errorBox.textContent = '';
+        resultBox.textContent = '';
+        metaBox.textContent = '';
+
+        const text = inputText.value.trim();
+        const tone = toneSelect.value;
+
+        if (!text) {
+            errorBox.textContent = 'Introduce un texto.';
+            errorBox.style.display = 'block';
+            return;
+        }
+
+        let temperature = temperatureInput.value.trim();
+        let topP = topPInput.value.trim();
+
+        const payload = {
+            text,
+            tone
+        };
+
+        if (temperature !== '') {
+            payload.temperature = parseFloat(temperature);
+        }
+        if (topP !== '') {
+            payload.topP = parseFloat(topP);
+        }
+
+        setLoading(true);
+
+        try {
+            const resp = await fetch('/api/v1/editor/rewrite', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!resp.ok) {
+                throw new Error('Error HTTP ' + resp.status);
+            }
+
+            const data = await resp.json();
+            resultBox.textContent = data.rewrittenText || '';
+            metaBox.textContent =
+                `Tono: ${tone} | ` +
+                `Temperature: ${payload.temperature ?? '(por defecto)'} | ` +
+                `top_p: ${payload.topP ?? '(por defecto)'}`;
+
+        } catch (e) {
+            errorBox.textContent = 'Ha ocurrido un error llamando a la API.';
+            errorBox.style.display = 'block';
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    clearBtn.addEventListener('click', () => {
+        inputText.value = '';
+        resultBox.textContent = '';
+        metaBox.textContent = '';
+        errorBox.style.display = 'none';
+        errorBox.textContent = '';
+        temperatureInput.value = '';
+        topPInput.value = '';
+        statusLabel.textContent = '';
+    });
+</script>
+</body>
+</html>
